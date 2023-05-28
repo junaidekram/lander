@@ -11,8 +11,9 @@ const gravity = 0.01;
 const sideEngineThrust = 0.01;
 const mainEngineThrust = 0.03;
 
+
 const ship = {
-  color: "black",
+  color: "navy",
   // height, width
   w: 8,
   h: 22,
@@ -45,9 +46,9 @@ function initShip() {
 
 function drawTriangle(a, b, c, fillStyle) {
   ctx.beginPath();
-  // TODO: draw a triange from three points a, b, and c.
-  // points are arrays, [0] - x coordinate, [1] - y coordinate
-  // see ctx.moveTo and ctx.lineTo
+  ctx.moveTo(a[0], a[1]);
+  ctx.lineTo(b[0], b[1]);
+  ctx.lineTo(c[0], c[1]);
   ctx.closePath();
   ctx.fillStyle = fillStyle;
   ctx.fill();
@@ -68,7 +69,7 @@ function drawShip() {
       [ship.w * -0.5, ship.h * 0.5],
       [ship.w * 0.5, ship.h * 0.5],
       [0, ship.h * 0.5 + Math.random() * 10],
-      "orange"
+      "yellow"
     );
   }
   if (ship.rightEngine) {
@@ -91,6 +92,18 @@ function drawShip() {
 }
 
 function updateShip() {
+  ship.dy += gravity;
+  if (ship.mainEngine){
+    ship.dy -= mainEngineThrust;
+  }
+  ship.y += ship.dy;
+  if (ship.leftEngine){
+    ship.dx += sideEngineThrust;
+  }
+  if (ship.rightEngine){
+    ship.dx -= sideEngineThrust;
+  }
+  ship.x += ship.dx;
   // TODO: update ship.dx, dy
   // what forces acting on the ship?
   // - left, right, main thruster
