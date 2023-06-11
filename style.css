@@ -3,7 +3,7 @@ body {
   place-content: center;
   text-align: center;
   gap: 10px;
-  background-color: black;
+  background-color: rgb(27, 60, 102);
 }
 
 #game-area {

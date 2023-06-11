@@ -2,7 +2,7 @@ const startBtn = document.getElementById("startBtn");
 const statusDiv = document.getElementById("status");
 const canvas = document.getElementById("game-area");
 const ctx = canvas.getContext("2d");
-
+const fuelDiv = document.getElementById("fuel");
 // Set the canvas size to 400x400
 canvas.width = 400;
 canvas.height = 400;
@@ -11,6 +11,7 @@ const gravity = 0.01;
 const sideEngineThrust = 0.01;
 const mainEngineThrust = 0.03;
 
+var fuel = 2000; 
 
 const ship = {
   color: "navy",
@@ -28,7 +29,24 @@ const ship = {
   rightEngine: false,
   crashed: false,
   landed: false,
+  LZbuffer : 3,
 };
+
+const platform = {
+  color: "black",
+  w: 40,
+  h: 10,
+  x: 180,
+  y: 390,
+  top: 390,
+  left: 180,
+  right: 220
+}
+
+function drawPlatform(){
+  ctx.fillStyle = platform.color;
+  ctx.fillRect(platform.x, platform.y, platform.w, platform.h);
+}
 
 function initShip() {
   // position
@@ -78,7 +96,7 @@ function drawShip() {
       [ship.w * 0.5 + Math.random() * 10, 0],
       [ship.w * 0.5, ship.h * 0.25],
       "orange"
-    );
+    ); 
   }
   if (ship.leftEngine) {
     drawTriangle(
@@ -93,15 +111,25 @@ function drawShip() {
 
 function updateShip() {
   ship.dy += gravity;
+  if (fuel < 3){
+    ship.mainEngine = false
+  }
+  if (fuel < 1){
+    ship.rightEngine = false;
+    ship.leftEngine = false;
+  }
   if (ship.mainEngine){
     ship.dy -= mainEngineThrust;
+    fuel -= 3;
   }
   ship.y += ship.dy;
   if (ship.leftEngine){
     ship.dx += sideEngineThrust;
+    fuel -= 1;
   }
   if (ship.rightEngine){
     ship.dx -= sideEngineThrust;
+    fuel -= 1;
   }
   ship.x += ship.dx;
   // TODO: update ship.dx, dy
@@ -110,34 +138,54 @@ function updateShip() {
   // - gravity
   // TODO: update the position - how does dx, dy affect x, y?
 }
-
+var shipcrash
 function checkCollision() {
   const top = ship.y - ship.h / 2;
   const bottom = ship.y + ship.h / 2;
   const left = ship.x - ship.w / 2;
   const right = ship.x + ship.w / 2;
-  // TODO: check that ship flew out of bounds. If so, set ship.crashed = true
-
-  // TODO: check if ship landed. If so, set ship.landed = true
-  // - What conditions have to be true for a soft landing?
+  if(top < 0 || bottom > canvas.height || right > canvas.height || left < 0){
+    ship.crashed = true;
+  }
+  const isNotCrashedPlatform = 
+    bottom < platform.top ||
+    left > platform.right ||
+    right < platform.left;
+  if (!isNotCrashedPlatform){
+    ship.crashed = true;
+    return; 
+  }
+  if(
+    ship.dx < 0.2 &&
+    ship.dy < 0.2 &&
+    left > platform.left &&
+    right < platform.right &&
+    bottom < platform.top &&
+    platform.top - bottom < ship.LZbuffer
+  ){
+    ship.landed = true;
+    return; 
+  }
 }
 
 function gameLoop() {
-  updateShip();
-
+  updateShip(); 
+  fuelDiv.innerHTML = "Fuel: " + fuel + " gallons";
   checkCollision();
   if (ship.crashed) {
-    statusDiv.innerHTML = "GAME OVER - crashed";
+    statusDiv.innerHTML = "GAME OVER - Crashed";
     endGame();
   } else if (ship.landed) {
-    statusDiv.innerHTML = "LANDED - you win!";
+    statusDiv.innerHTML = "LANDED - You Win!";
     endGame();
   } else {
     // Clear entire screen
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawShip();
+    drawPlatform();
     requestAnimationFrame(gameLoop);
-  }
+  } 
+
 }
 
 function keyLetGo(event) {
@@ -177,7 +225,8 @@ function keyPressed(event) {
 }
 
 function start() {
-  // console.log("start", ship);
+  fuel = 1000;
+  fuelDiv.innerHTML = "Fuel: " + fuel + " gallons";
   startBtn.disabled = true;
   statusDiv.innerHTML = "";
   initShip();
