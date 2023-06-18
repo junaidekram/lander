@@ -7,6 +7,8 @@ const fuelDiv = document.getElementById("fuel");
 canvas.width = 400;
 canvas.height = 400;
 
+const prjs = [];
+
 const gravity = 0.01;
 const sideEngineThrust = 0.01;
 const mainEngineThrust = 0.03;
@@ -14,7 +16,7 @@ const mainEngineThrust = 0.03;
 var fuel = 2000; 
 
 const ship = {
-  color: "navy",
+  color: "green",
   // height, width
   w: 8,
   h: 22,
@@ -48,6 +50,14 @@ function drawPlatform(){
   ctx.fillRect(platform.x, platform.y, platform.w, platform.h);
 }
 
+function drawPrjs(){
+  for(let i = 0; i < prjs.length; i ++){
+    let prj = prjs[i];
+    ctx.fillStyle = prj.color;
+    ctx.fillRect(prj.x, prj.y, prj.w, prj.h);
+  }
+}
+
 function initShip() {
   // position
   ship.x = 150 + Math.random() * 100;
@@ -60,6 +70,37 @@ function initShip() {
   ship.rightEngine = false;
   ship.crashed = false;
   ship.landed = false;
+}
+
+function initPrjs(){
+  prjs.length = 0;
+  for (let i = 0; i < 10; i ++){
+    let prj = {
+      x : Math.floor(Math.random() * 400),
+      y : 0,
+      dx : 1-(Math.random() * 2),
+      dy : Math.random(),
+      h: 4,
+      w:4,
+      color: "yellow",
+    }
+    prjs.push(prj);
+  }
+}
+
+function initPrjs2(){
+  for (let i = 0; i < 10; i ++){
+    let prj = {
+      x : ship.x,
+      y : ship.y,
+      dx : Math.random() * 10 - 5,
+      dy : Math.random() * 2 - 1,
+      h: 4,
+      w: 4,
+      color: "green",
+    }
+    prjs.push(prj);
+  }
 }
 
 function drawTriangle(a, b, c, fillStyle) {
@@ -138,6 +179,16 @@ function updateShip() {
   // - gravity
   // TODO: update the position - how does dx, dy affect x, y?
 }
+
+function updatePrjs(){
+  for(let i = 0; i < prjs.length; i ++){
+    let prj = prjs[i];
+    prj.dy += gravity;
+    prj.x += prj.dx;
+    prj.y += prj.dy;
+  }
+}
+
 var shipcrash
 function checkCollision() {
   const top = ship.y - ship.h / 2;
@@ -168,13 +219,49 @@ function checkCollision() {
   }
 }
 
+function fillStar(x, y, s) {
+  ctx.fillStyle = "orange";
+  ctx.beginPath();
+  ctx.moveTo(x, y + s * 0.4);
+  ctx.lineTo(x + s, y + s * 0.4);
+  ctx.lineTo(x + s * 0.15, y + s * 0.9);
+  ctx.lineTo(x + s / 2, y);
+  ctx.lineTo(x + s * 0.85, y + s * 0.9);
+  ctx.lineTo(x, y + s * 0.4);
+  ctx.fill();
+}
+
+function clear(){
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawPlatform();
+  drawPrjs();
+}
+
+function endGameLoop(){
+  updatePrjs();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawPlatform();
+  drawPrjs();
+  if(!startBtn.disabled){
+    requestAnimationFrame(endGameLoop)
+  }
+}
+
+
 function gameLoop() {
   updateShip(); 
+  updatePrjs();
   fuelDiv.innerHTML = "Fuel: " + fuel + " gallons";
   checkCollision();
   if (ship.crashed) {
     statusDiv.innerHTML = "GAME OVER - Crashed";
+    ctx.fillStyle = "orange";
     endGame();
+    ctx.fillRect(ship.x - 11, ship.y - 12, 23, 23)
+    fillStar(ship.x - 24, ship.y - 25, 50)
+    setTimeout(clear, 2000);
+    initPrjs2();
+    requestAnimationFrame(endGameLoop)
   } else if (ship.landed) {
     statusDiv.innerHTML = "LANDED - You Win!";
     endGame();
@@ -183,6 +270,7 @@ function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawShip();
     drawPlatform();
+    drawPrjs();
     requestAnimationFrame(gameLoop);
   } 
 
@@ -229,6 +317,7 @@ function start() {
   fuelDiv.innerHTML = "Fuel: " + fuel + " gallons";
   startBtn.disabled = true;
   statusDiv.innerHTML = "";
+  initPrjs();
   initShip();
 
   document.addEventListener("keyup", keyLetGo);
