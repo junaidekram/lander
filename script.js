@@ -205,6 +205,7 @@ function checkCollision() {
     ship.crashed = true;
     return;
   }
+  
 
   for(let i = 0; i < prjs.length; i ++){
     if(ship.overlaps(prjs[i])){
