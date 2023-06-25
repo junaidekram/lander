@@ -9,6 +9,7 @@ canvas.height = 400;
 
 const prjs = [];
 
+
 class Rect {
   constructor(x, y, w, h, ){
     this.x = x;
