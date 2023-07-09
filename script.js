@@ -90,13 +90,13 @@ function initShip() {
   ship.landed = false;
 }
 
-terrain.push(0, 310);
-terrain.push(100, 310);
-terrain.push(platform.left, platform.bottom);
-terrain.push(platform.right, platform.bottom);
-terrain.push(300, 250);
-terrain.push(350, 290);
-terrain.push(400, 300);
+terrain.push([0, 310]);
+terrain.push([100, 310]);
+terrain.push([platform.left, platform.bottom]);
+terrain.push([platform.right, platform.bottom]);
+terrain.push([300, 250]);
+terrain.push([350, 290]);
+terrain.push([400, 300]);
 
 function initPrjs(){
   prjs.length = 0;
@@ -137,7 +137,7 @@ function drawTerrain(){
   }
   ctx.lineTo(400, 400);
   ctx.closePath();
-  ctx.fillStyle = "black";
+  ctx.fillStyle = "grey";
   ctx.fill();
 }
 
@@ -276,6 +276,7 @@ function endGameLoop(){
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawPlatform();
   drawPrjs();
+  drawTerrain();
   if (ex){
     ctx.fillStyle = "orange";
     ctx.fillRect(ship.x - 11, ship.y - 12, 23, 23)
