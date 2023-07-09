@@ -9,6 +9,7 @@ canvas.height = 400;
 
 const prjs = [];
 
+const terrain = [];
 
 class Rect {
   constructor(x, y, w, h, ){
@@ -59,7 +60,7 @@ ship.crashed = false;
 ship.landed = false;
 ship.LZbuffer = 3;
 
-const platform = new Rect(180, 390, 40, 10);
+const platform = new Rect(180, 380, 40, 10);
 platform.color = "black";
 
 function drawPlatform(){
@@ -88,6 +89,14 @@ function initShip() {
   ship.crashed = false;
   ship.landed = false;
 }
+
+terrain.push(0, 310);
+terrain.push(100, 310);
+terrain.push(platform.left, platform.bottom);
+terrain.push(platform.right, platform.bottom);
+terrain.push(300, 250);
+terrain.push(350, 290);
+terrain.push(400, 300);
 
 function initPrjs(){
   prjs.length = 0;
@@ -120,6 +129,18 @@ function drawTriangle(a, b, c, fillStyle) {
   ctx.fill();
 }
 
+function drawTerrain(){
+  ctx.beginPath();
+  ctx.moveTo(0, 400);
+  for (let i = 0; i < terrain.length; i++){
+    ctx.lineTo(terrain[i][0], terrain[i][1]);
+  }
+  ctx.lineTo(400, 400);
+  ctx.closePath();
+  ctx.fillStyle = "black";
+  ctx.fill();
+}
+
 function drawShip() {
   ctx.save();
   ctx.beginPath();
@@ -145,6 +166,7 @@ function drawShip() {
       [ship.w * 0.5, ship.h * 0.25],
       "orange"
     ); 
+  
   }
   if (ship.leftEngine) {
     drawTriangle(
@@ -243,6 +265,7 @@ function clear(){
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawPlatform();
   drawPrjs();
+  drawTerrain();
   ex = false;
 }
 
@@ -285,9 +308,10 @@ function gameLoop() {
   } else {
     // Clear entire screen
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawPrjs();
     drawShip();
     drawPlatform();
-    drawPrjs();
+    drawTerrain();
     requestAnimationFrame(gameLoop);
   } 
 
