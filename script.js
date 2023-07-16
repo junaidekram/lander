@@ -60,7 +60,7 @@ ship.crashed = false;
 ship.landed = false;
 ship.LZbuffer = 3;
 
-const platform = new Rect(180, 380, 40, 10);
+const platform = new Rect(185, 380, 30, 5);
 platform.color = "black";
 
 function drawPlatform(){
@@ -89,23 +89,30 @@ function initShip() {
   ship.crashed = false;
   ship.landed = false;
 }
-
-terrain.push([0, 310]);
-terrain.push([100, 310]);
-terrain.push([platform.left, platform.bottom]);
-terrain.push([platform.right, platform.bottom]);
-terrain.push([300, 250]);
-terrain.push([350, 290]);
-terrain.push([400, 300]);
-
+function createTerrain(){
+  var one = 245 + Math.random()*100;
+  var two = 250 + Math.random()*120;
+  var three = 230 + Math.random()*120;
+  var four = 245 + Math.random()*140;
+  var five = 250 + Math.random()*100
+  terrain.push([0, one]);
+  terrain.push([100, two]);
+  terrain.push([platform.left, platform.bottom]);
+  terrain.push([platform.right, platform.bottom]);
+  terrain.push([300, three]);
+  terrain.push([350, four]);
+  terrain.push([400, five]);
+}
 function initPrjs(){
-  prjs.length = 0;
   for (let i = 0; i < 10; i ++){
     let prj = new Rect(Math.floor(Math.random() * 400), 0, 4, 4);
     prj.dx = 1-(Math.random()*2);
     prj.dy = Math.random();
     prj.color = "yellow";
     prjs.push(prj);
+  }
+  if (!gameEnd){
+    setTimeout(initPrjs, 5000); 
   }
 }
 
@@ -218,7 +225,35 @@ function updatePrjs(){
   }
 }
 
+function distance(a, b){
+  return Math.hypot(a[0]-b[0], a[1]-b[1]);
+}
+
 function checkCollision() {
+  for (let i = 0; i < terrain.length -1; i++){
+    const a = terrain[i];
+    const b = terrain[i +1];
+    const l = [ship.left, ship.bottom];
+    const r = [ship.right, ship.bottom];
+    const ablen = distance(a, b);
+    const allen = distance(a, l);
+    const arlen = distance(a, r);
+    const lblen = distance(l, b);
+    const rblen = distance(r, b);
+
+    const fudge = 0.1;
+
+
+    if (ablen + fudge > allen + lblen){
+      ship.crashed = true;
+      return;
+    }
+    if (ablen + fudge > arlen + rblen){
+      ship.crashed = true;
+      return;
+    }
+  }
+
   if(ship.top < 0 || ship.bottom > canvas.height || ship.right > canvas.height || ship.left < 0){
     ship.crashed = true;
     return;
@@ -358,7 +393,11 @@ function keyPressed(event) {
 }
 
 function start() {
+  gameEnd = false;
+  prjs.length = 0;
   fuel = 1000;
+  terrain.length = 0;
+  createTerrain();
   fuelDiv.innerHTML = "Fuel: " + fuel + " gallons";
   startBtn.disabled = true;
   statusDiv.innerHTML = "";
@@ -370,8 +409,10 @@ function start() {
   requestAnimationFrame(gameLoop);
 }
 
+var gameEnd;
+
 function endGame() {
-  // console.log("endGame", ship);
+  gameEnd = true;
   startBtn.disabled = false;
   document.removeEventListener("keyup", keyLetGo);
   document.removeEventListener("keydown", keyPressed);
